@@ -314,7 +314,7 @@ tests:
         results[0]
             .collector_logs
             .iter()
-            .any(|l| l.contains("address already in use"))
+            .any(|l| l.contains(&format!("127.0.0.1:{}: bind:", planned[0].injection_port)))
     );
     let Outcome::Error(second) = &results[1].outcome else {
         panic!("{results:#?}")
