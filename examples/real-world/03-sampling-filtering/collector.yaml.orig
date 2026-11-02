@@ -1,0 +1,59 @@
+# Cost control: drop probe traffic, then keep only traces worth paying for —
+# errors, slow requests and enterprise customers. Everything else is dropped.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1024
+
+  # Kubernetes probes fail during rollouts; those errors must not be sampled.
+  filter/probes:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.route"] == "/healthz"
+        - attributes["http.route"] == "/readyz"
+
+  tail_sampling:
+    decision_wait: 500ms
+    num_traces: 50000
+    expected_new_traces_per_sec: 1000
+    policies:
+      - name: errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: slow
+        type: latency
+        latency:
+          threshold_ms: 1000
+      - name: enterprise
+        type: string_attribute
+        string_attribute:
+          key: customer.tier
+          values: [enterprise]
+      - name: baseline
+        type: always_sample
+
+  batch:
+    timeout: 200ms
+
+exporters:
+  otlp_grpc/honeycomb:
+    endpoint: api.honeycomb.io:443
+    headers:
+      x-honeycomb-team: ${env:HONEYCOMB_API_KEY}
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, filter/probes, tail_sampling, batch]
+      exporters: [otlp_grpc/honeycomb]

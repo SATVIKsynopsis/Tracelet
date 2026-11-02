@@ -1,0 +1,2 @@
+unknown tenants go to the shared topic :: exporter kafka/shared receives 1 item(s)
+spans without a tenant go to the shared topic :: exporter kafka/shared receives 1 item(s)

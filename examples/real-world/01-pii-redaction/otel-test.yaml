@@ -1,0 +1,40 @@
+collector: ./collector.yaml
+
+defaults:
+  timeout: 2s
+
+tests:
+  - name: attributes outside the allowlist are deleted
+    input: fixtures/checkout-span.json
+    expect:
+      - attribute: payment.card.number
+        absent: true
+      - attribute: user.password
+        absent: true
+      - attribute: http.request.header.authorization
+        absent: true
+      - exporter: otlp_http/vendor
+        count: 1
+
+  - name: e-mail addresses are masked on allowed keys
+    input: fixtures/checkout-span.json
+    expect:
+      - attribute: user.email
+        equals: "****"
+
+  # Guards against over-redaction: a too-strict policy is also a regression.
+  - name: operational attributes survive redaction
+    input: fixtures/checkout-span.json
+    expect:
+      - attribute: http.route
+        level: item
+        equals: /checkout
+      - attribute: http.response.status_code
+        equals: 201
+      - attribute: payment.amount
+        equals: 49.95
+      - attribute: payment.card.last4
+        equals: "1111"
+      - attribute: service.name
+        level: resource
+        equals: payments

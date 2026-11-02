@@ -1,0 +1,28 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {"attributes":[{"key":"service.name","value":{"stringValue":"auth"}},{"key":"deployment.environment.name","value":{"stringValue":"test"}}]},
+      "scopeLogs": [
+        {
+          "scope": { "name": "otel-test.fixtures", "version": "1.0.0" },
+          "logRecords": [
+            {
+              "timeUnixNano": "1735689600000000000",
+              "observedTimeUnixNano": "1735689600000000000",
+              "severityNumber": 9,
+              "severityText": "INFO",
+              "body": { "stringValue": "login attempt" },
+              "attributes": [
+                { "key": "user.name", "value": { "stringValue": "alice" } },
+                { "key": "password", "value": { "stringValue": "hunter2" } },
+                { "key": "client.address", "value": { "stringValue": "203.0.113.7" } }
+              ],
+              "traceId": "5b8efff798038103d269b633813fc60f",
+              "spanId": "eee19b7ec3c1b177"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

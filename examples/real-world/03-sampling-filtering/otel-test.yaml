@@ -1,0 +1,43 @@
+collector: ./collector.yaml
+
+# tail_sampling decides 500ms after a trace's first span; 2s leaves margin.
+defaults:
+  timeout: 2s
+
+tests:
+  - name: error traces are kept in full
+    input: fixtures/error-trace.json
+    expect:
+      # All three spans, not only the failing one.
+      - exporter: otlp_grpc/honeycomb
+        count: 3
+
+  - name: slow traces are kept
+    input: fixtures/slow-trace.json
+    expect:
+      - exporter: otlp_grpc/honeycomb
+        count: 2
+
+  - name: enterprise traces are kept
+    input: fixtures/enterprise-trace.json
+    expect:
+      - exporter: otlp_grpc/honeycomb
+        count: 1
+      - attribute: customer.tier
+        level: resource
+        equals: enterprise
+
+  - name: fast healthy traces are not sampled
+    input: fixtures/fast-ok-trace.json
+    expect:
+      - dropped: true
+
+  - name: failing readiness probes are dropped before sampling
+    input: fixtures/failing-probe-trace.json
+    expect:
+      - dropped: true
+
+  - name: probes are identified by user agent
+    input: fixtures/probe-other-route-trace.json
+    expect:
+      - dropped: true

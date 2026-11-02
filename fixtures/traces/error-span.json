@@ -1,0 +1,29 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {"attributes":[{"key":"service.name","value":{"stringValue":"payment-api"}},{"key":"deployment.environment.name","value":{"stringValue":"test"}}]},
+      "scopeSpans": [
+        {
+          "scope": { "name": "otel-test.fixtures", "version": "1.0.0" },
+          "spans": [
+            {
+              "traceId": "5b8efff798038103d269b633813fc60e",
+              "spanId": "eee19b7ec3c1b176",
+              "name": "POST /api/charge",
+              "kind": 2,
+              "startTimeUnixNano": "1735689600000000000",
+              "endTimeUnixNano": "1735689600120000000",
+              "attributes": [
+                { "key": "http.request.method", "value": { "stringValue": "POST" } },
+                { "key": "http.route", "value": { "stringValue": "/api/charge" } },
+                { "key": "http.response.status_code", "value": { "intValue": "500" } },
+                { "key": "error.type", "value": { "stringValue": "503" } }
+              ],
+              "status": { "code": 2, "message": "card processor unavailable" }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

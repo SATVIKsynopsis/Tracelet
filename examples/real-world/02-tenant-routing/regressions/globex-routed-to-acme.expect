@@ -1,0 +1,2 @@
+globex spans reach only the globex backend :: exporter otlp_grpc/globex receives 1 item(s)
+globex spans reach only the globex backend :: exporter otlp_http/acme receives 0 item(s)

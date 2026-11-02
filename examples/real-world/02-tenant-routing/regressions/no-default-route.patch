@@ -1,0 +1,10 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -22,7 +22,6 @@
+ connectors:
+   forward/fanout: {}
+   routing/tenant:
+-    default_pipelines: [traces/shared]
+     error_mode: ignore
+     table:
+       - context: resource

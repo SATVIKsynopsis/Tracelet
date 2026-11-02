@@ -1,0 +1,10 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -31,7 +31,6 @@
+       - user.email
+     blocked_values:
+       - "4[0-9]{12}(?:[0-9]{3})?"                          # Visa
+-      - "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"   # e-mail
+     summary: info
+ 
+   batch:

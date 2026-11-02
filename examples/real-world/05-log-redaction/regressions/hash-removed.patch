@@ -1,0 +1,10 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -40,7 +40,6 @@
+           # Secrets: removed by key name, wherever they came from.
+           - delete_matching_keys(attributes, "(?i).*(password|passwd|secret|token|api[-_.]?key).*")
+           # Pseudonymize, keep joinable.
+-          - set(attributes["user.id"], SHA256(attributes["user.id"])) where attributes["user.id"] != nil
+           - replace_pattern(attributes["user.email"], "^[^@]+@", "***@")
+           # Keep the /24 only.
+           - replace_pattern(attributes["client.address"], "^(\\d+\\.\\d+\\.\\d+)\\.\\d+$", "$$1.0")

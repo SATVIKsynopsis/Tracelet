@@ -1,0 +1,84 @@
+# Metrics gateway in front of Mimir. Normalizes old semantic conventions,
+# removes a high-cardinality label by aggregation, drops runtime noise and
+# stamps the environment.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: checkout
+          scrape_interval: 15s
+          static_configs:
+            - targets: [checkout.internal:9464]
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 2048
+
+  # Old SDKs still emit http.status_code; dashboards use the new name.
+  # Must run before aggregation, which keeps only the new name.
+  transform/semconv:
+    error_mode: ignore
+    metric_statements:
+      - context: datapoint
+        statements:
+          - set(attributes["http.response.status_code"], attributes["http.status_code"]) where attributes["http.status_code"] != nil
+          - delete_key(attributes, "http.status_code")
+
+  # user.id explodes series cardinality in Mimir. Sum it away.
+  metrics_transform/cardinality:
+    transforms:
+      - include: http.server.request.count
+        action: update
+        operations:
+          - action: aggregate_labels
+            label_set: [http.route, http.response.status_code]
+            aggregation_type: sum
+
+  filter/runtime:
+    error_mode: ignore
+    metrics:
+      metric:
+        - IsMatch(name, "^go_.*")
+        - IsMatch(name, "^debug\\..*")
+
+  resource/env:
+    attributes:
+      - key: deployment.environment.name
+        value: production
+        action: upsert
+      - key: host.ip
+        action: delete
+
+  batch:
+    timeout: 200ms
+
+exporters:
+  prometheus_remote_write/mimir:
+    endpoint: https://mimir.internal/api/v1/push
+    auth:
+      authenticator: basicauth/mimir
+    resource_to_telemetry_conversion:
+      enabled: true
+  prometheus/local:
+    endpoint: 0.0.0.0:8889
+
+extensions:
+  basicauth/mimir:
+    client_auth:
+      username: collector
+      password: ${env:MIMIR_PASSWORD}
+
+service:
+  extensions: [basicauth/mimir]
+  pipelines:
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, transform/semconv, metrics_transform/cardinality, filter/runtime, resource/env, batch]
+      exporters: [prometheus_remote_write/mimir, prometheus/local]

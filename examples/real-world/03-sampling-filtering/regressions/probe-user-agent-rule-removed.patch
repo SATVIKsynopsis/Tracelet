@@ -1,0 +1,10 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -20,7 +20,6 @@
+       span:
+         - attributes["http.route"] == "/healthz"
+         - attributes["http.route"] == "/readyz"
+-        - IsMatch(attributes["user_agent.original"], "^kube-probe/.*")
+ 
+   tail_sampling:
+     decision_wait: 500ms

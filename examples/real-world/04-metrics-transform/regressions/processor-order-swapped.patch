@@ -1,0 +1,9 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -80,5 +80,5 @@
+   pipelines:
+     metrics:
+       receivers: [otlp, prometheus]
+-      processors: [memory_limiter, transform/semconv, metrics_transform/cardinality, filter/runtime, resource/env, batch]
++      processors: [memory_limiter, metrics_transform/cardinality, transform/semconv, filter/runtime, resource/env, batch]
+       exporters: [prometheus_remote_write/mimir, prometheus/local]

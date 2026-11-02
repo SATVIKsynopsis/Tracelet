@@ -1,0 +1,2 @@
+acme spans reach only the acme backend :: exporter otlp_grpc/alerts receives 0 item(s)
+errors reach the tenant backend and alerting :: exporter otlp_grpc/alerts receives 1 item(s)

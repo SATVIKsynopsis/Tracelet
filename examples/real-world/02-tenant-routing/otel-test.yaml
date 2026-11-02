@@ -1,0 +1,56 @@
+collector: ./collector.yaml
+
+defaults:
+  timeout: 1500ms
+
+tests:
+  - name: acme spans reach only the acme backend
+    input: fixtures/acme-span.json
+    expect:
+      - exporter: otlp_http/acme
+        count: 1
+      - exporter: otlp_grpc/globex
+        count: 0
+      - exporter: kafka/shared
+        count: 0
+      - exporter: otlp_grpc/alerts
+        count: 0
+      - attribute: tenant.id
+        exporter: otlp_http/acme
+        equals: acme
+
+  - name: globex spans reach only the globex backend
+    input: fixtures/globex-span.json
+    expect:
+      - exporter: otlp_grpc/globex
+        count: 1
+      - exporter: otlp_http/acme
+        count: 0
+      - exporter: kafka/shared
+        count: 0
+
+  - name: unknown tenants go to the shared topic
+    input: fixtures/unknown-tenant-span.json
+    expect:
+      - exporter: kafka/shared
+        count: 1
+      - exporter: otlp_http/acme
+        count: 0
+      - exporter: otlp_grpc/globex
+        count: 0
+
+  - name: spans without a tenant go to the shared topic
+    input: fixtures/no-tenant-span.json
+    expect:
+      - exporter: kafka/shared
+        count: 1
+
+  - name: errors reach the tenant backend and alerting
+    input: fixtures/acme-error-span.json
+    expect:
+      - exporter: otlp_http/acme
+        count: 1
+      - exporter: otlp_grpc/alerts
+        count: 1
+      - exporter: otlp_grpc/globex
+        count: 0

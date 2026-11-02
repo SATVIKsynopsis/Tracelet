@@ -1,0 +1,13 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -27,10 +27,6 @@
+     num_traces: 50000
+     expected_new_traces_per_sec: 1000
+     policies:
+-      - name: errors
+-        type: status_code
+-        status_code:
+-          status_codes: [ERROR]
+       - name: slow
+         type: latency
+         latency:

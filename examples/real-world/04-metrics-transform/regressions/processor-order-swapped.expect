@@ -1,0 +1,2 @@
+user.id is aggregated away :: exporter prometheus_remote_write/mimir receives 3 item(s)
+legacy status code is renamed :: attribute http.response.status_code (item level) is present

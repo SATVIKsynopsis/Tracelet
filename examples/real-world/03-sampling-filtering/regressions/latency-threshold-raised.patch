@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -34,7 +34,7 @@
+       - name: slow
+         type: latency
+         latency:
+-          threshold_ms: 1000
++          threshold_ms: 5000
+       - name: enterprise
+         type: string_attribute
+         string_attribute:

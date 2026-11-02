@@ -1,0 +1,66 @@
+# Errors are routed to Datadog, everything else to the OTLP backend; logs fan
+# out to two exporters. The original config cannot pass `otelcol validate`
+# without production credentials (DD_API_KEY, basicauth), which is exactly the
+# situation otel-test must handle.
+receivers:
+  otlp:
+    protocols:
+      grpc: {endpoint: 0.0.0.0:4317}
+      http: {endpoint: 0.0.0.0:4318}
+  filelog/app:
+    include: [/var/log/app/*.log]
+
+processors:
+  filter/healthz:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.route"] == "/healthz"
+  attributes/redact:
+    actions:
+      - {key: password, action: delete}
+  batch:
+    timeout: 200ms
+
+connectors:
+  routing/errors:
+    default_pipelines: [traces/default]
+    table:
+      - context: span
+        condition: status.code == STATUS_CODE_ERROR
+        pipelines: [traces/errors]
+
+exporters:
+  datadog:
+    api:
+      key: ${env:DD_API_KEY}
+  otlp_http/backend:
+    endpoint: https://otlp.example.com
+    auth:
+      authenticator: basicauth/backend
+  debug: {}
+
+extensions:
+  basicauth/backend:
+    client_auth: {username: collector, password: "${env:BACKEND_PASSWORD}"}
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check, basicauth/backend]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [filter/healthz, attributes/redact]
+      exporters: [routing/errors]
+    traces/errors:
+      receivers: [routing/errors]
+      exporters: [datadog]
+    traces/default:
+      receivers: [routing/errors]
+      processors: [batch]
+      exporters: [otlp_http/backend]
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [attributes/redact]
+      exporters: [otlp_http/backend, debug]

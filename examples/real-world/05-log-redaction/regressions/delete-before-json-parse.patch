@@ -1,0 +1,15 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -34,11 +34,10 @@
+         statements:
+           # SDKs that log JSON strings: lift the fields into attributes first,
+           # so the rules below see them.
++          - delete_matching_keys(attributes, "(?i).*(password|passwd|secret|token|api[-_.]?key).*")
+           - merge_maps(attributes, ParseJSON(body), "upsert") where IsString(body) and IsMatch(body, "^\\s*\\{")
+           - set(body, attributes["message"]) where attributes["message"] != nil
+           - delete_key(attributes, "message")
+-          # Secrets: removed by key name, wherever they came from.
+-          - delete_matching_keys(attributes, "(?i).*(password|passwd|secret|token|api[-_.]?key).*")
+           # Pseudonymize, keep joinable.
+           - set(attributes["user.id"], SHA256(attributes["user.id"])) where attributes["user.id"] != nil
+           - replace_pattern(attributes["user.email"], "^[^@]+@", "***@")

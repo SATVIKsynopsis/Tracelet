@@ -1,0 +1,81 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "auth"
+            }
+          }
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {
+            "name": "auth.logging",
+            "version": "1.0.0"
+          },
+          "logRecords": [
+            {
+              "timeUnixNano": "1735689600000000000",
+              "observedTimeUnixNano": "1735689600000000000",
+              "severityNumber": 9,
+              "severityText": "INFO",
+              "body": {
+                "stringValue": "password reset requested"
+              },
+              "attributes": [
+                {
+                  "key": "event",
+                  "value": {
+                    "stringValue": "password_reset"
+                  }
+                },
+                {
+                  "key": "user.id",
+                  "value": {
+                    "stringValue": "u-1002"
+                  }
+                },
+                {
+                  "key": "user.email",
+                  "value": {
+                    "stringValue": "bob@example.org"
+                  }
+                },
+                {
+                  "key": "client.address",
+                  "value": {
+                    "stringValue": "198.51.100.23"
+                  }
+                },
+                {
+                  "key": "http.request.header.x-api-key",
+                  "value": {
+                    "stringValue": "sk_live_51Hx"
+                  }
+                },
+                {
+                  "key": "db.password",
+                  "value": {
+                    "stringValue": "p@ss"
+                  }
+                },
+                {
+                  "key": "reset.token",
+                  "value": {
+                    "stringValue": "tok_123"
+                  }
+                }
+              ],
+              "traceId": "5b8efff798038103d269b633813fc60f",
+              "spanId": "eee19b7ec3c1b177"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

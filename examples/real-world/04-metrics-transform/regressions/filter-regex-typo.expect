@@ -1,0 +1,2 @@
+runtime metrics are dropped :: telemetry is dropped
+scraped metrics get the same treatment :: exporter prometheus_remote_write/mimir receives 3 item(s)

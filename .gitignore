@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+# Downloaded collector binaries cached by local runs
+/.otel-test/
+.DS_Store
+.otel-test-cache/

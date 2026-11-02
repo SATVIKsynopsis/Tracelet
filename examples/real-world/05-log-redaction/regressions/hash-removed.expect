@@ -1,0 +1,2 @@
+user identifiers are pseudonymized :: attribute user.id equals "9222f9e2c70724702691185338c9b1c5781ff4cafee48296d4887ca37ca1401a"
+JSON-body logs are pseudonymized too :: attribute user.id matches /[0-9a-f]{64}/

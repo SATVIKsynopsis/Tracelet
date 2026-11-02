@@ -1,0 +1,68 @@
+collector: ./collector.yaml
+
+defaults:
+  timeout: 2s
+  receiver: otlp
+
+tests:
+  - name: secrets inside JSON bodies are removed
+    input: fixtures/json-body-log.json
+    expect:
+      - attribute: password
+        absent: true
+      - attribute: session_token
+        absent: true
+      # The JSON was parsed, not just discarded.
+      - attribute: event
+        equals: login
+
+  - name: secret attributes are removed by key pattern
+    input: fixtures/structured-log.json
+    expect:
+      - attribute: db.password
+        absent: true
+      - attribute: reset.token
+        absent: true
+      - attribute: http.request.header.x-api-key
+        absent: true
+      - attribute: event
+        equals: password_reset
+
+  - name: user identifiers are pseudonymized
+    input: fixtures/structured-log.json
+    expect:
+      - attribute: user.id
+        # SHA-256 of "u-1002" (shasum -a 256): stable, so logs stay joinable.
+        equals: 9222f9e2c70724702691185338c9b1c5781ff4cafee48296d4887ca37ca1401a
+      - attribute: user.email
+        equals: "***@example.org"
+      - attribute: client.address
+        equals: 198.51.100.0
+
+  - name: JSON-body logs are pseudonymized too
+    input: fixtures/json-body-log.json
+    expect:
+      - attribute: user.id
+        matches: "[0-9a-f]{64}"
+      - attribute: user.email
+        equals: "***@example.com"
+      - attribute: client.address
+        equals: 203.0.113.0
+      - exporter: otlp_http/loki
+        count: 1
+      - exporter: file/archive
+        count: 1
+
+  - name: debug logs are dropped
+    input: fixtures/debug-log.json
+    expect:
+      - dropped: true
+
+  - name: file logs get the same treatment
+    input: fixtures/json-body-log.json
+    receiver: filelog/app
+    expect:
+      - attribute: password
+        absent: true
+      - attribute: user.email
+        equals: "***@example.com"

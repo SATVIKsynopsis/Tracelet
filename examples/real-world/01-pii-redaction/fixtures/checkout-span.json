@@ -1,0 +1,37 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {"attributes": [
+        {"key": "service.name", "value": {"stringValue": "payments"}},
+        {"key": "deployment.environment.name", "value": {"stringValue": "production"}}
+      ]},
+      "scopeSpans": [
+        {
+          "scope": {"name": "payments.http", "version": "2.3.1"},
+          "spans": [
+            {
+              "traceId": "0af7651916cd43dd8448eb211c80319c",
+              "spanId": "b7ad6b7169203331",
+              "name": "POST /checkout",
+              "kind": 2,
+              "startTimeUnixNano": "1735689600000000000",
+              "endTimeUnixNano": "1735689600250000000",
+              "attributes": [
+                {"key": "http.request.method", "value": {"stringValue": "POST"}},
+                {"key": "http.route", "value": {"stringValue": "/checkout"}},
+                {"key": "http.response.status_code", "value": {"intValue": "201"}},
+                {"key": "payment.card.number", "value": {"stringValue": "4111111111111111"}},
+                {"key": "payment.card.last4", "value": {"stringValue": "1111"}},
+                {"key": "payment.amount", "value": {"doubleValue": 49.95}},
+                {"key": "user.email", "value": {"stringValue": "alice@example.com"}},
+                {"key": "http.request.header.authorization", "value": {"stringValue": "Bearer eyJhbGciOiJIUzI1NiJ9.secret"}},
+                {"key": "user.password", "value": {"stringValue": "hunter2"}}
+              ],
+              "status": {"code": 1}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "orders"
+            }
+          },
+          {
+            "key": "customer.tier",
+            "value": {
+              "stringValue": "free"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "orders.http",
+            "version": "3.0.0"
+          },
+          "spans": [
+            {
+              "traceId": "55555555555555555555555555555555",
+              "spanId": "5000000000000001",
+              "name": "GET /readyz",
+              "kind": 2,
+              "startTimeUnixNano": "1735689600000000000",
+              "endTimeUnixNano": "1735689600003000000",
+              "attributes": [
+                {
+                  "key": "http.request.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.route",
+                  "value": {
+                    "stringValue": "/readyz"
+                  }
+                },
+                {
+                  "key": "http.response.status_code",
+                  "value": {
+                    "intValue": "503"
+                  }
+                },
+                {
+                  "key": "user_agent.original",
+                  "value": {
+                    "stringValue": "kube-probe/1.31"
+                  }
+                }
+              ],
+              "status": {
+                "code": 2,
+                "message": "error"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

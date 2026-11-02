@@ -1,0 +1,51 @@
+collector: ./collector.yaml
+
+defaults:
+  timeout: 2s
+  receiver: otlp
+
+tests:
+  - name: user.id is aggregated away
+    input: fixtures/http-requests.json
+    expect:
+      - attribute: user.id
+        absent: true
+      # 4 input points -> 3 series: (/orders,200) (/orders,500) (/cart,200).
+      - exporter: prometheus_remote_write/mimir
+        count: 3
+      - exporter: prometheus/local
+        count: 3
+
+  - name: legacy status code is renamed
+    input: fixtures/http-requests.json
+    expect:
+      - attribute: http.status_code
+        absent: true
+      - attribute: http.response.status_code
+        level: item
+        present: true
+      - attribute: http.route
+        matches: "/(orders|cart)"
+
+  - name: environment is stamped and host.ip removed
+    input: fixtures/http-requests.json
+    expect:
+      - attribute: deployment.environment.name
+        level: resource
+        equals: production
+      - attribute: host.ip
+        absent: true
+
+  - name: runtime metrics are dropped
+    input: fixtures/runtime-metrics.json
+    expect:
+      - dropped: true
+
+  - name: scraped metrics get the same treatment
+    input: fixtures/mixed-scrape.json
+    receiver: prometheus
+    expect:
+      - exporter: prometheus_remote_write/mimir
+        count: 3
+      - attribute: user.id
+        absent: true

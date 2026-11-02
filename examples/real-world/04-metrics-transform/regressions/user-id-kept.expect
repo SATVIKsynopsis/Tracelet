@@ -1,0 +1,2 @@
+user.id is aggregated away :: attribute user.id is absent
+user.id is aggregated away :: exporter prometheus_remote_write/mimir receives 3 item(s)

@@ -1,0 +1,45 @@
+# Routing and fan-out tests for the multi-exporter scenario.
+collector: ./collector.yaml
+
+defaults:
+  timeout: 1500ms
+  # Logs pipelines have two receivers (otlp, filelog/app); inject through otlp.
+  receiver: otlp
+
+tests:
+  - name: errors reach datadog only
+    input: ../../../fixtures/traces/error-span.json
+    expect:
+      - exporter: datadog
+        count: 1
+      - exporter: otlp_http/backend
+        count: 0
+      - attribute: http.response.status_code
+        equals: 500
+        exporter: datadog
+
+  - name: other spans go to the backend
+    input: ../../../fixtures/traces/app-span.json
+    expect:
+      - exporter: otlp_http/backend
+        count: 1
+      - exporter: datadog
+        count: 0
+      - attribute: service.name
+        level: resource
+        matches: "check.*"
+
+  - name: health checks are dropped
+    input: ../../../fixtures/traces/healthz-span.json
+    expect:
+      - dropped: true
+
+  - name: logs fan out redacted
+    input: ../../../fixtures/logs/login-log.json
+    expect:
+      - exporter: otlp_http/backend
+        count: 1
+      - exporter: debug
+        count: 1
+      - attribute: password
+        absent: true

@@ -1,0 +1,45 @@
+# A production-style Collector configuration. otel-test runs it unchanged
+# except for receivers and exporters, which it swaps for local test endpoints.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Remove credentials before telemetry leaves the Collector.
+  attributes/redact:
+    actions:
+      - key: password
+        action: delete
+      - key: user.name
+        action: hash
+
+  # Health checks are noise; drop them.
+  filter/healthz:
+    error_mode: ignore
+    traces:
+      span:
+        - attributes["http.route"] == "/healthz"
+
+  batch:
+    timeout: 200ms
+
+exporters:
+  otlp_http/backend:
+    endpoint: https://otlp.example.com
+    headers:
+      authorization: "Bearer ${env:BACKEND_TOKEN}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [filter/healthz, attributes/redact, batch]
+      exporters: [otlp_http/backend]
+    logs:
+      receivers: [otlp]
+      processors: [attributes/redact, batch]
+      exporters: [otlp_http/backend]

@@ -1,0 +1,30 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {"attributes":[{"key":"service.name","value":{"stringValue":"auth"}},{"key":"deployment.environment.name","value":{"stringValue":"test"}}]},
+      "scopeSpans": [
+        {
+          "scope": { "name": "otel-test.fixtures", "version": "1.0.0" },
+          "spans": [
+            {
+              "traceId": "5b8efff798038103d269b633813fc60f",
+              "spanId": "eee19b7ec3c1b177",
+              "name": "POST /login",
+              "kind": 2,
+              "startTimeUnixNano": "1735689600000000000",
+              "endTimeUnixNano": "1735689600120000000",
+              "attributes": [
+                { "key": "http.request.method", "value": { "stringValue": "POST" } },
+                { "key": "http.route", "value": { "stringValue": "/login" } },
+                { "key": "user.name", "value": { "stringValue": "alice" } },
+                { "key": "password", "value": { "stringValue": "hunter2" } },
+                { "key": "http.response.status_code", "value": { "intValue": "200" } }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

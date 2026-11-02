@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -45,7 +45,7 @@
+     error_mode: ignore
+     metrics:
+       metric:
+-        - IsMatch(name, "^go_.*")
++        - IsMatch(name, "^go-.*")
+         - IsMatch(name, "^debug\\..*")
+ 
+   resource/env:

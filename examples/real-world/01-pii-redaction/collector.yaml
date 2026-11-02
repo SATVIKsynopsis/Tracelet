@@ -1,0 +1,61 @@
+# Payment service gateway. Spans may carry card numbers, e-mail addresses and
+# credentials; only an allowlist of attributes may leave the Collector.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+
+  # Allowlist: every span attribute not listed is deleted. Values that look
+  # like card numbers or e-mail addresses are masked even on allowed keys.
+  # The allowlist also applies to *resource* attributes, so service.name and
+  # the environment must be listed or every span loses its service.
+  redaction/pii:
+    allow_all_keys: false
+    allowed_keys:
+      - service.name
+      - deployment.environment.name
+      - http.request.method
+      - http.route
+      - http.response.status_code
+      - payment.card.last4
+      - payment.amount
+      - user.email
+    blocked_values:
+      - "4[0-9]{12}(?:[0-9]{3})?"                          # Visa
+      - "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"   # e-mail
+    summary: info
+
+  batch:
+    timeout: 200ms
+
+exporters:
+  otlp_http/vendor:
+    endpoint: https://otlp.vendor.example.com
+    headers:
+      x-api-key: ${env:VENDOR_API_KEY}
+    sending_queue:
+      enabled: true
+      storage: file_storage/queue
+
+extensions:
+  file_storage/queue:
+    directory: /var/lib/otelcol/queue
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check, file_storage/queue]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction/pii, batch]
+      exporters: [otlp_http/vendor]

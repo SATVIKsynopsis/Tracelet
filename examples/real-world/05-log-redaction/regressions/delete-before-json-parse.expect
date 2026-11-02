@@ -1,0 +1,3 @@
+secrets inside JSON bodies are removed :: attribute password is absent
+secrets inside JSON bodies are removed :: attribute session_token is absent
+file logs get the same treatment :: attribute password is absent

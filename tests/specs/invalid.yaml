@@ -1,0 +1,10 @@
+# Deliberately invalid: used by CLI integration tests.
+collector: ../../examples/password-redaction/collector.yaml
+tests:
+  - name: no expectations
+    input: ../../fixtures/traces/app-span.json
+    expect: []
+  - name: bad assertion
+    input: ../../fixtures/traces/missing.json
+    expect:
+      - attribute: password

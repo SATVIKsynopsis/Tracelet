@@ -1,0 +1,28 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {"attributes":[{"key":"service.name","value":{"stringValue":"checkout"}},{"key":"deployment.environment.name","value":{"stringValue":"test"}}]},
+      "scopeSpans": [
+        {
+          "scope": { "name": "otel-test.fixtures", "version": "1.0.0" },
+          "spans": [
+            {
+              "traceId": "5b8efff798038103d269b633813fc60d",
+              "spanId": "eee19b7ec3c1b175",
+              "name": "GET /healthz",
+              "kind": 2,
+              "startTimeUnixNano": "1735689600000000000",
+              "endTimeUnixNano": "1735689600120000000",
+              "attributes": [
+                { "key": "http.request.method", "value": { "stringValue": "GET" } },
+                { "key": "http.route", "value": { "stringValue": "/healthz" } },
+                { "key": "http.response.status_code", "value": { "intValue": "200" } }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

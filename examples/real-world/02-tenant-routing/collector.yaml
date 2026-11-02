@@ -1,0 +1,78 @@
+# Multi-tenant gateway. Each tenant's spans must reach only that tenant's
+# backend; spans from unknown tenants go to a shared Kafka topic; error spans
+# from any tenant are additionally copied to the on-call alerting backend.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 200ms
+  # The alerting branch only wants errors.
+  filter/errors_only:
+    error_mode: ignore
+    traces:
+      span:
+        - status.code != STATUS_CODE_ERROR
+
+connectors:
+  forward/fanout: {}
+  routing/tenant:
+    default_pipelines: [traces/shared]
+    error_mode: ignore
+    table:
+      - context: resource
+        condition: attributes["tenant.id"] == "acme"
+        pipelines: [traces/acme]
+      - context: resource
+        condition: attributes["tenant.id"] == "globex"
+        pipelines: [traces/globex]
+
+exporters:
+  otlp_http/acme:
+    endpoint: https://acme.ingest.example.com
+    headers:
+      authorization: Bearer ${env:ACME_TOKEN}
+  otlp_grpc/globex:
+    endpoint: globex.ingest.example.com:4317
+    auth:
+      authenticator: bearertokenauth/globex
+  kafka/shared:
+    brokers: [kafka-1.internal:9092, kafka-2.internal:9092]
+    traces:
+      topic: otlp_spans_shared
+  otlp_grpc/alerts:
+    endpoint: alerts.internal:4317
+    tls:
+      insecure: true
+
+extensions:
+  bearertokenauth/globex:
+    token: ${env:GLOBEX_TOKEN}
+
+service:
+  extensions: [bearertokenauth/globex]
+  pipelines:
+    traces/in:
+      receivers: [otlp]
+      exporters: [routing/tenant, forward/fanout]
+    traces/acme:
+      receivers: [routing/tenant]
+      processors: [batch]
+      exporters: [otlp_http/acme]
+    traces/globex:
+      receivers: [routing/tenant]
+      processors: [batch]
+      exporters: [otlp_grpc/globex]
+    traces/shared:
+      receivers: [routing/tenant]
+      processors: [batch]
+      exporters: [kafka/shared]
+    traces/alerts:
+      receivers: [forward/fanout]
+      processors: [filter/errors_only]
+      exporters: [otlp_grpc/alerts]

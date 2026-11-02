@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -38,7 +38,7 @@
+         action: update
+         operations:
+           - action: aggregate_labels
+-            label_set: [http.route, http.response.status_code]
++            label_set: [http.route, http.response.status_code, user.id]
+             aggregation_type: sum
+ 
+   filter/runtime:

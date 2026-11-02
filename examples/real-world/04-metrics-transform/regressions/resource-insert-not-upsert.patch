@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -52,7 +52,7 @@
+     attributes:
+       - key: deployment.environment.name
+         value: production
+-        action: upsert
++        action: insert
+       - key: host.ip
+         action: delete
+ 

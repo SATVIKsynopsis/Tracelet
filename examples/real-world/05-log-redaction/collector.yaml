@@ -1,0 +1,66 @@
+# Application logs to Loki and a compliance archive. Logs arrive from files and
+# from OTLP SDKs; some services log JSON strings as the body. Secrets must be
+# removed wherever they appear, user identifiers pseudonymized, and client IPs
+# anonymized before anything is stored.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  filelog/app:
+    include: [/var/log/app/*.log]
+    start_at: end
+    operators:
+      - type: json_parser
+        if: body matches "^\\{"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 1024
+
+  filter/debug:
+    error_mode: ignore
+    logs:
+      log_record:
+        - severity_number != SEVERITY_NUMBER_UNSPECIFIED and severity_number < SEVERITY_NUMBER_INFO
+
+  transform/privacy:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          # SDKs that log JSON strings: lift the fields into attributes first,
+          # so the rules below see them.
+          - merge_maps(attributes, ParseJSON(body), "upsert") where IsString(body) and IsMatch(body, "^\\s*\\{")
+          - set(body, attributes["message"]) where attributes["message"] != nil
+          - delete_key(attributes, "message")
+          # Secrets: removed by key name, wherever they came from.
+          - delete_matching_keys(attributes, "(?i).*(password|passwd|secret|token|api[-_.]?key).*")
+          # Pseudonymize, keep joinable.
+          - set(attributes["user.id"], SHA256(attributes["user.id"])) where attributes["user.id"] != nil
+          - replace_pattern(attributes["user.email"], "^[^@]+@", "***@")
+          # Keep the /24 only.
+          - replace_pattern(attributes["client.address"], "^(\\d+\\.\\d+\\.\\d+)\\.\\d+$", "$$1.0")
+
+  batch:
+    timeout: 200ms
+
+exporters:
+  otlp_http/loki:
+    endpoint: https://loki.internal/otlp
+    headers:
+      X-Scope-OrgID: platform
+  file/archive:
+    path: /var/lib/otelcol/archive/logs.jsonl
+    rotation:
+      max_megabytes: 100
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp, filelog/app]
+      processors: [memory_limiter, filter/debug, transform/privacy, batch]
+      exporters: [otlp_http/loki, file/archive]

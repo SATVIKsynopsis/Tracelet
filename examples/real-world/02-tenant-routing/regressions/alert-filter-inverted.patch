@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -17,7 +17,7 @@
+     error_mode: ignore
+     traces:
+       span:
+-        - status.code != STATUS_CODE_ERROR
++        - status.code == STATUS_CODE_ERROR
+ 
+ connectors:
+   forward/fanout: {}

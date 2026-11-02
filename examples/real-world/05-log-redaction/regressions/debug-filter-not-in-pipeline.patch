@@ -1,0 +1,9 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -62,5 +62,5 @@
+   pipelines:
+     logs:
+       receivers: [otlp, filelog/app]
+-      processors: [memory_limiter, filter/debug, transform/privacy, batch]
++      processors: [memory_limiter, transform/privacy, batch]
+       exporters: [otlp_http/loki, file/archive]

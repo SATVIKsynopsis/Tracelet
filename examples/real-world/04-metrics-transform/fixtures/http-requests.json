@@ -1,0 +1,149 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "checkout"
+            }
+          },
+          {
+            "key": "host.ip",
+            "value": {
+              "stringValue": "10.0.4.17"
+            }
+          },
+          {
+            "key": "deployment.environment.name",
+            "value": {
+              "stringValue": "staging"
+            }
+          }
+        ]
+      },
+      "scopeMetrics": [
+        {
+          "scope": {
+            "name": "checkout.metrics",
+            "version": "1.2.0"
+          },
+          "metrics": [
+            {
+              "name": "http.server.request.count",
+              "unit": "{request}",
+              "description": "HTTP requests served",
+              "sum": {
+                "aggregationTemporality": 2,
+                "isMonotonic": true,
+                "dataPoints": [
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "40",
+                    "attributes": [
+                      {
+                        "key": "http.route",
+                        "value": {
+                          "stringValue": "/orders"
+                        }
+                      },
+                      {
+                        "key": "http.status_code",
+                        "value": {
+                          "intValue": "200"
+                        }
+                      },
+                      {
+                        "key": "user.id",
+                        "value": {
+                          "stringValue": "u-1001"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "25",
+                    "attributes": [
+                      {
+                        "key": "http.route",
+                        "value": {
+                          "stringValue": "/orders"
+                        }
+                      },
+                      {
+                        "key": "http.status_code",
+                        "value": {
+                          "intValue": "200"
+                        }
+                      },
+                      {
+                        "key": "user.id",
+                        "value": {
+                          "stringValue": "u-1002"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "3",
+                    "attributes": [
+                      {
+                        "key": "http.route",
+                        "value": {
+                          "stringValue": "/orders"
+                        }
+                      },
+                      {
+                        "key": "http.status_code",
+                        "value": {
+                          "intValue": "500"
+                        }
+                      },
+                      {
+                        "key": "user.id",
+                        "value": {
+                          "stringValue": "u-1001"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "12",
+                    "attributes": [
+                      {
+                        "key": "http.route",
+                        "value": {
+                          "stringValue": "/cart"
+                        }
+                      },
+                      {
+                        "key": "http.status_code",
+                        "value": {
+                          "intValue": "200"
+                        }
+                      },
+                      {
+                        "key": "user.id",
+                        "value": {
+                          "stringValue": "u-1003"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

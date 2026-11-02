@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -30,7 +30,7 @@
+         pipelines: [traces/acme]
+       - context: resource
+         condition: attributes["tenant.id"] == "globex"
+-        pipelines: [traces/globex]
++        pipelines: [traces/acme]
+ 
+ exporters:
+   otlp_http/acme:

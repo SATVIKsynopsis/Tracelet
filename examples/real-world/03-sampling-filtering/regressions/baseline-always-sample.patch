@@ -1,0 +1,11 @@
+--- a/collector.yaml
++++ b/collector.yaml
+@@ -40,6 +40,8 @@
+         string_attribute:
+           key: customer.tier
+           values: [enterprise]
++      - name: baseline
++        type: always_sample
+ 
+   batch:
+     timeout: 200ms

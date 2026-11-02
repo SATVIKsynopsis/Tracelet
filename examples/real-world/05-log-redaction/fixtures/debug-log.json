@@ -1,0 +1,45 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "auth"
+            }
+          }
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {
+            "name": "auth.logging",
+            "version": "1.0.0"
+          },
+          "logRecords": [
+            {
+              "timeUnixNano": "1735689600000000000",
+              "observedTimeUnixNano": "1735689600000000000",
+              "severityNumber": 5,
+              "severityText": "DEBUG",
+              "body": {
+                "stringValue": "cache miss for session 9f8e7d6c"
+              },
+              "attributes": [
+                {
+                  "key": "cache.key",
+                  "value": {
+                    "stringValue": "session:9f8e7d6c"
+                  }
+                }
+              ],
+              "traceId": "5b8efff798038103d269b633813fc60f",
+              "spanId": "eee19b7ec3c1b177"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

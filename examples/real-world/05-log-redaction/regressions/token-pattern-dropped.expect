@@ -1,0 +1,2 @@
+secrets inside JSON bodies are removed :: attribute session_token is absent
+secret attributes are removed by key pattern :: attribute reset.token is absent

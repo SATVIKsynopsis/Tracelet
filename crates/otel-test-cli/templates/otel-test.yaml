@@ -1,0 +1,28 @@
+collector: ./collector.yaml
+
+defaults:
+  timeout: 2s
+
+tests:
+  - name: passwords are removed from spans
+    input: fixtures/login-span.json
+    expect:
+      - attribute: password
+        absent: true
+      - attribute: http.route
+        equals: /login
+      - exporter: otlp_http/backend
+        count: 1
+
+  - name: passwords are removed from logs
+    input: fixtures/login-log.json
+    expect:
+      - attribute: password
+        absent: true
+      - attribute: user.name
+        matches: "[0-9a-f]{64}"
+
+  - name: health checks are dropped
+    input: fixtures/healthz-span.json
+    expect:
+      - dropped: true

@@ -1,0 +1,43 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {"attributes":[{"key":"service.name","value":{"stringValue":"checkout"}},{"key":"deployment.environment.name","value":{"stringValue":"test"}}]},
+      "scopeMetrics": [
+        {
+          "scope": { "name": "otel-test.fixtures", "version": "1.0.0" },
+          "metrics": [
+            {
+              "name": "http.server.request.count",
+              "unit": "{request}",
+              "description": "Number of HTTP requests served",
+              "sum": {
+                "aggregationTemporality": 2,
+                "isMonotonic": true,
+                "dataPoints": [
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "42",
+                    "attributes": [
+                { "key": "http.route", "value": { "stringValue": "/api/orders" } },
+                { "key": "http.response.status_code", "value": { "intValue": "200" } }
+                    ]
+                  },
+                  {
+                    "startTimeUnixNano": "1735689540000000000",
+                    "timeUnixNano": "1735689600000000000",
+                    "asInt": "3",
+                    "attributes": [
+                { "key": "http.route", "value": { "stringValue": "/api/orders" } },
+                { "key": "http.response.status_code", "value": { "intValue": "500" } }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
