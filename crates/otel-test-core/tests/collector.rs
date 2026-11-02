@@ -443,7 +443,8 @@ async fn startup_failure_is_reported_with_logs() {
     };
     assert!(!status.success());
     assert!(
-        logs.iter().any(|l| l.contains("address already in use")),
+        logs.iter()
+            .any(|l| l.contains(&format!("127.0.0.1:{taken}: bind:"))),
         "{logs:#?}"
     );
     assert!(err.to_string().contains("Collector output"), "{err}");

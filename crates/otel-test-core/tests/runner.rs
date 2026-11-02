@@ -38,10 +38,13 @@ async fn plan_problems(spec_path: &Path) -> Vec<Problem> {
 fn scenario(collector_yaml: &str, spec_yaml: &str) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
     std::fs::write(dir.path().join("collector.yaml"), collector_yaml).unwrap();
-    let fixtures = repo("fixtures").canonicalize().unwrap();
+    let fixtures = std::path::absolute(repo("fixtures"))
+        .unwrap()
+        .to_string_lossy()
+        .replace('\\', "/");
     std::fs::write(
         dir.path().join("otel-test.yaml"),
-        spec_yaml.replace("{fixtures}", &fixtures.display().to_string()),
+        spec_yaml.replace("{fixtures}", &fixtures),
     )
     .unwrap();
     dir
@@ -184,6 +187,10 @@ tests:
 }
 
 #[tokio::test]
+#[cfg_attr(
+    windows,
+    ignore = "Windows has no graceful stop signal: the Collector is killed and buffered telemetry is lost"
+)]
 async fn buffered_telemetry_is_flushed_into_its_own_test() {
     let dir = scenario(
         r#"
