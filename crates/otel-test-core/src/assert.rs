@@ -219,7 +219,7 @@ pub fn evaluate(
                 (
                     false,
                     vec![
-                        format!("Expected: nothing exported"),
+                        "Expected: nothing exported".to_owned(),
                         format!("Actual:   {} exported", nouns.quantity(None, total)),
                         format!("Received: {}", describe_counts(&all)),
                     ],

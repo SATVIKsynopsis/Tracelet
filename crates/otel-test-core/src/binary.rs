@@ -327,12 +327,15 @@ fn extract(archive: &Path, url: &str, target: &Path) -> Result<(), BinaryError> 
                 .set_permissions(std::fs::Permissions::from_mode(0o755))
                 .map_err(io_err("failed to set permissions on", target))?;
         }
-        out.persist(target).map_err(|e| BinaryError::Io {
-            context: "failed to move executable into cache at",
-            path: target.to_path_buf(),
-            source: e.error,
-        })?;
-        return Ok(());
+        return match out.persist(target) {
+            Ok(_) => Ok(()),
+            Err(_) if target.is_file() => Ok(()),
+            Err(e) => Err(BinaryError::Io {
+                context: "failed to move executable into cache at",
+                path: target.to_path_buf(),
+                source: e.error,
+            }),
+        };
     }
     Err(BinaryError::MissingInArchive {
         url: url.to_owned(),

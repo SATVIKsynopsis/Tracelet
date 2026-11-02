@@ -236,10 +236,10 @@ async fn captures_processed_telemetry_under_exporter_identity() {
             .iter()
             .any(|l| l.contains("Everything is ready"))
     );
-    let status = running.stop(SHUTDOWN_GRACE).await.unwrap();
+    let stopped = running.stop(SHUTDOWN_GRACE).await.unwrap();
     assert!(
-        status.success(),
-        "graceful shutdown should exit 0, got {status}"
+        stopped.check().is_ok(),
+        "graceful shutdown should be clean, got {stopped:?}"
     );
     cap.shutdown().await;
 }
@@ -525,5 +525,5 @@ async fn crash_after_startup_is_detected() {
     }
     let exited = exited.expect("crash was not detected");
     assert!(!exited.success());
-    assert!(!running.stop(SHUTDOWN_GRACE).await.unwrap().success());
+    assert!(running.stop(SHUTDOWN_GRACE).await.unwrap().check().is_err());
 }

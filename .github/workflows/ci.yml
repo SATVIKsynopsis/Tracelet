@@ -7,7 +7,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  # Integration tests run the real Collector; cache the verified download.
   OTEL_TEST_CACHE_DIR: ${{ github.workspace }}/.otel-test-cache
 
 jobs:
@@ -35,9 +34,8 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .otel-test-cache
-          # Bump together with binary::PINNED_VERSION.
           key: otelcol-contrib-0.164.0-${{ runner.os }}-${{ runner.arch }}
-      - run: cargo test --workspace
+      - run: cargo test --workspace --no-fail-fast
       - name: Real-world examples (positive and negative)
         if: runner.os != 'Windows'
         run: |

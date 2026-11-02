@@ -367,12 +367,12 @@ async fn run_one(
 
     let before_shutdown = window.snapshot().len();
     match running.shutdown(SHUTDOWN_GRACE).await {
-        Ok((status, logs)) => {
+        Ok((stopped, logs)) => {
             result.collector_logs = logs;
-            if !status.success() && failure.is_none() {
-                failure = Some(format!(
-                    "the Collector exited with {status} during shutdown"
-                ));
+            if let Err(e) = stopped.check()
+                && failure.is_none()
+            {
+                failure = Some(format!("{e} during shutdown"));
             }
         }
         Err(e) => failure = failure.or(Some(e.to_string())),

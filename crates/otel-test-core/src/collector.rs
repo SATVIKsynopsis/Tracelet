@@ -125,10 +125,7 @@ impl Collector {
         })?;
         let path = absolute.as_path();
         let version_out = run(path, &["--version"], "--version").await?;
-        let version = version_out
-            .split_whitespace()
-            .last()
-            .filter(|v| v.chars().next().is_some_and(|c| c.is_ascii_digit()))
+        let version = parse_version(&version_out)
             .ok_or_else(|| CollectorError::Probe {
                 path: path.to_path_buf(),
                 command: "--version",
@@ -408,36 +405,45 @@ impl RunningCollector {
         self.child.try_wait()
     }
 
-    pub async fn stop(self, grace: Duration) -> Result<ExitStatus, CollectorError> {
-        self.shutdown(grace).await.map(|(status, _)| status)
+    pub async fn stop(self, grace: Duration) -> Result<Stopped, CollectorError> {
+        self.shutdown(grace).await.map(|(stopped, _)| stopped)
     }
 
     pub async fn shutdown(
         mut self,
         grace: Duration,
-    ) -> Result<(ExitStatus, Vec<String>), CollectorError> {
-        let status = self.wait_for_exit(grace).await?;
+    ) -> Result<(Stopped, Vec<String>), CollectorError> {
+        let stopped = self.wait_for_exit(grace).await?;
         self.drain_logs().await;
-        Ok((status, self.logs()))
+        Ok((stopped, self.logs()))
     }
 
-    async fn wait_for_exit(&mut self, grace: Duration) -> Result<ExitStatus, CollectorError> {
+    async fn wait_for_exit(&mut self, grace: Duration) -> Result<Stopped, CollectorError> {
         if let Some(status) = self.child.try_wait().map_err(CollectorError::Stop)? {
-            return Ok(status);
+            return Ok(Stopped {
+                status,
+                how: StopKind::AlreadyExited,
+            });
         }
         terminate(&mut self.child);
-        let status = match tokio::time::timeout(grace, self.child.wait()).await {
-            Ok(r) => r.map_err(CollectorError::Stop)?,
+        let stopped = match tokio::time::timeout(grace, self.child.wait()).await {
+            Ok(r) => Stopped {
+                status: r.map_err(CollectorError::Stop)?,
+                how: StopKind::OnRequest,
+            },
             Err(_) => {
                 tracing::warn!(
                     "Collector did not exit within {}s; killing it",
                     grace.as_secs_f32()
                 );
                 self.child.kill().await.map_err(CollectorError::Stop)?;
-                self.child.wait().await.map_err(CollectorError::Stop)?
+                Stopped {
+                    status: self.child.wait().await.map_err(CollectorError::Stop)?,
+                    how: StopKind::KilledAfterGrace,
+                }
             }
         };
-        Ok(status)
+        Ok(stopped)
     }
 
     async fn drain_logs(&mut self) {
@@ -461,15 +467,66 @@ fn terminate(child: &mut Child) {
     let _ = child.start_kill();
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StopKind {
+    AlreadyExited,
+    OnRequest,
+    KilledAfterGrace,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Stopped {
+    pub status: ExitStatus,
+    pub how: StopKind,
+}
+
+impl Stopped {
+    pub fn check(&self) -> Result<(), String> {
+        match self.how {
+            StopKind::KilledAfterGrace => Err(
+                "the Collector did not exit after the shutdown request and was killed".to_owned(),
+            ),
+            StopKind::OnRequest if cfg!(not(unix)) => Ok(()),
+            _ if self.status.success() => Ok(()),
+            _ => Err(format!("the Collector exited with {}", self.status)),
+        }
+    }
+}
+
 pub fn free_port() -> std::io::Result<u16> {
     Ok(std::net::TcpListener::bind("127.0.0.1:0")?
         .local_addr()?
         .port())
 }
 
+fn parse_version(out: &str) -> Option<String> {
+    let re = regex::Regex::new(r"^\S+ version v?(\d+\.\d+\.\d+\S*)$").expect("valid regex");
+    let first = out.lines().next()?.trim();
+    re.captures(first).map(|c| c[1].to_owned())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn version_output() {
+        assert_eq!(
+            parse_version("otelcol-contrib version 0.164.0\n").as_deref(),
+            Some("0.164.0")
+        );
+        assert_eq!(
+            parse_version("my-otelcol version v0.120.1-dev").as_deref(),
+            Some("0.120.1-dev")
+        );
+        assert_eq!(parse_version("echo (uutils coreutils) 0.2.2"), None);
+        assert_eq!(
+            parse_version("echo (GNU coreutils) 9.4\nWritten by Brian Fox and Chet Ramey."),
+            None
+        );
+        assert_eq!(parse_version("--version"), None);
+        assert_eq!(parse_version(""), None);
+    }
 
     #[tokio::test]
     async fn missing_binary() {
